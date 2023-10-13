@@ -1,6 +1,7 @@
 # unirent-load-testing
 
-Load test is scheduled to run daily at midnight UTC and on push to main branch
+Load test is scheduled to run daily at midnight UTC and on push to main branch.
+Running on AWS Lambda using Github Actions not working. Not sure why OIDC connection is failing
 
 ## Running locally
 
