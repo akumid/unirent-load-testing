@@ -1,0 +1,40 @@
+config:
+  target: https://wgc5bl5febahteicg4kvlxgari.appsync-api.ap-southeast-1.amazonaws.com
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      name: Warm up
+
+scenarios:
+  - name: List accommodations
+    flow:
+      - post:
+          url: "/graphql"
+          headers:
+            x-api-key: "{{ $processEnvironment.APPSYNC_API_KEY }}"
+          expect:
+            - jmespath: "data != null"
+            - jmespath: "errors == null"
+          json:
+            operationName: MyQuery
+            variables: { "limit": 10 }
+            query: |
+              query MyQuery($limit: Int!) {
+                listAccommodations(limit: $limit) {
+                  items {
+                    availableDate
+                    createdAt
+                    id
+                    images
+                    price
+                    propertyType
+                    rented
+                    title
+                    userId
+                    User {
+                      name
+                    }
+                    address
+                  }
+                }
+              }

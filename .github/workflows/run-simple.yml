@@ -1,0 +1,34 @@
+name: Simple load test
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * *"
+
+env:
+  apiKey: ${{ secrets.APPSYNC_API_KEY }}
+
+jobs:
+  artillery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Make reports directory
+        run: mkdir -p reports
+      - name: Write .env file
+        run: |
+          echo "APPSYNC_API_KEY=$apiKey" >> .env
+      - name: Execute load test
+        uses: artilleryio/action-cli@v1
+        with:
+          command: run artillery/simple.yml --output reports/simple.json --dotenv .env
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: artillery-report
+          path: reports/
