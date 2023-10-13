@@ -23,3 +23,4 @@ artillery run artillery/simple.yml --dotenv .env.local
 
 https://www.artillery.io/blog/github-action-fargate-lambda
 https://www.artillery.io/docs/load-testing-at-scale/aws-lambda
+https://github.com/aws-actions/configure-aws-credentials#configure-aws-credentials-for-github-actions
