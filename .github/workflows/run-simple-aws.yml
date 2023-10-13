@@ -1,0 +1,46 @@
+name: Simple load test (scaled)
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+env:
+  apiKey: ${{ secrets.APPSYNC_API_KEY }}
+
+jobs:
+  artillery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        env:
+          SHOW_STACK_TRACE: true # in case there are issues, this can help with debugging
+        with:
+          aws-region: ap-southeast-1
+          role-to-assume: ${{ secrets.ARTILLERY_ROLE_ARN }}
+          role-session-name: OIDCSession
+      - name: Make reports directory
+        run: mkdir -p reports
+      - name: Write .env file
+        run: |
+          echo "APPSYNC_API_KEY=$apiKey" >> .env
+      - name: Execute load test on AWS (ap-southeast-1)
+        uses: artilleryio/action-cli@v1
+        with:
+          command: run-lambda artillery/simple.yml --output reports/simple-scaled.json --dotenv .env --region ap-southeast-1 --count 5
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: artillery-report-scaled
+          path: reports/
