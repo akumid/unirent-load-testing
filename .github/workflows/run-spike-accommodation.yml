@@ -1,0 +1,35 @@
+name: Spike test for Recommendation API
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * *"
+
+# currently no api key required for API Gateway calls
+# env:
+#   apiKey: ${{ secrets.APPSYNC_API_KEY }}
+
+jobs:
+  artillery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Make reports directory
+        run: mkdir -p reports
+      # - name: Write .env file
+      #   run: |
+      #     echo "APPSYNC_API_KEY=$apiKey" >> .env
+      - name: Execute load test
+        uses: artilleryio/action-cli@v1
+        with:
+          command: run artillery/spike-recommendation.yml --output reports/spike-recommendation.json
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: artillery-report
+          path: reports/
